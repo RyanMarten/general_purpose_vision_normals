@@ -1,1 +1,2 @@
-# sparse2dense
+# General Purpose Vision Normal Benchmark
+
