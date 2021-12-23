@@ -33,7 +33,6 @@ def download_file_from_google_drive(id, destination):
 
 if __name__ == "__main__":
     os.makedirs('./checkpoints', exist_ok=True)
-    os.makedirs('./examples', exist_ok=True)
 
     if not os.path.exists('./checkpoints/nyu.pt'):
         print('downloading the model trained on NYUv2...')
@@ -43,6 +42,3 @@ if __name__ == "__main__":
         print('downloading the model trained on ScanNet...')
         download_file_from_google_drive('1lOgY9sbMRW73qNdJze9bPkM2cmfA8Re-', './checkpoints/scannet.pt')
 
-    if not os.path.exists('./examples/examples.zip'):
-        print('downloading test images...')
-        download_file_from_google_drive('1bGZ4VFGkqrTLzQs0ELxEKo8xe_1Sfejg', './examples/examples.zip')
