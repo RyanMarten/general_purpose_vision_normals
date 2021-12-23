@@ -6,3 +6,5 @@ weights
 **.npy
 __pycache__
 test.py
+.idea
+.DS_Store

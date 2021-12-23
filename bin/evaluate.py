@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--device', type=str, default='cuda', help='the devices used for evaluation' )
     parser.add_argument('--rotation', action='store_true', help = 'Whether enforce a rotation matrix' )
 
-    # Added ones
+    # Added for other Normal Uncertainty Network
     parser.add_argument('--architecture', default = 'BN', type=str, help='{BN, GN}')
     parser.add_argument("--pretrained", default = 'scannet', type=str, help="{nyu, scannet}")
     parser.add_argument('--sampling_ratio', type=float, default=0.4)
