@@ -122,15 +122,9 @@ if __name__ == '__main__':
 
     #########################################################################################################
     # Get network, need manual modification
-
-    # from model.normal_old_estimator import NormalEstimator
-    # n_model = NormalEstimator(pretrained_weight = 'weights/ori_weight/normal_scannet.pth').to(dev)
-    # n_model.eval()
-    
-    sys.path.append('../surface_normal_uncertainty')
     from models.NNET import NNET
     from utils import utils
-    checkpoint = '../surface_normal_uncertainty/checkpoints/%s.pt' % args.pretrained
+    checkpoint = 'checkpoints/%s.pt' % args.pretrained
     model = NNET(args).to(dev)
     model = utils.load_checkpoint(checkpoint, model)
     model.eval()
