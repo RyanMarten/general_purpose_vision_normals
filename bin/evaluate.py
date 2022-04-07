@@ -41,11 +41,21 @@ def val_loss(n_model, dataset_list, args):
         for i, data in enumerate(val_loader):
             images, normals = data['image'], data['normals']
             images, normals = images.to(dev), normals.to(dev)  
-            valid_mask = ((normals **2).sum(dim = 1) > 0.8) # Remove invalid pixels of normals
 
-            if dataset == 'BlendedMVS' or dataset == 'DTU':
-                angle_sharp_mask =  sharp_normal_mask(normals)
-                valid_mask = valid_mask & (angle_sharp_mask[0] == 0)                
+            ### CHANGED
+            # valid_mask = ((normals **2).sum(dim = 1) > 0.8) # Remove invalid pixels of normals
+            # if dataset == 'BlendedMVS' or dataset == 'DTU':
+            #     angle_sharp_mask =  sharp_normal_mask(normals)
+            #     valid_mask = valid_mask & (angle_sharp_mask[0] == 0) 
+
+            # print(normals.shape) # torch.Size([1, 3, 2048, 1536])
+            # normals_rgb = (gt_normals[0].cpu().permute(1,2,0).numpy() * 0.5 + 0.5)
+            if dataset == 'BlendedMVS':
+                valid_mask_1 = np.logical_and.reduce(normals != [0,0,0], axis=2)
+                valid_mask_2 = np.logical_and.reduce(normals != [128, 128, 128], axis=2)
+                valid_mask = np.logical_and(valid_mask_1, valid_mask_2)
+            if dataset == 'DTU':
+                valid_mask = np.logical_and.reduce(normals != [201,201,201], axis=2)             
 
             normals = NF.normalize(normals, p = 2, dim = 1) # normalize it after getting the mask
             with torch.no_grad():
