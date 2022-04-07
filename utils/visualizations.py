@@ -13,9 +13,9 @@ def save_images(images, pred_normals, gt_normals, mask, save_dir, dataset, i):
     dataset_dir = os.path.join(save_dir, dataset)
     if not os.path.exists(dataset_dir):
         os.makedirs(dataset_dir)
-    plt.imsave(os.path.join(dataset_dir,'{}_gt.png'.format(i) ),gt_normals[0].cpu().permute(1,2,0).numpy() * 0.5 + 0.5)
-    plt.imsave(os.path.join(dataset_dir,'{}_pred.png'.format(i) ),pred_normals[0].cpu().permute(1,2,0).numpy() * 0.5 + 0.5)
-    plt.imsave(os.path.join(dataset_dir,'{}_rgb.png'.format(i) ),images[0].cpu().permute(1,2,0).numpy())
+    plt.imsave(os.path.join(dataset_dir,'{}_gt.png'.format(i) ),(gt_normals[0].cpu().permute(1,2,0).numpy() * 0.5 + 0.5).clip(0.0,1.0))
+    plt.imsave(os.path.join(dataset_dir,'{}_pred.png'.format(i) ),(pred_normals[0].cpu().permute(1,2,0).numpy() * 0.5 + 0.5).clip(0.0,1.0))
+    plt.imsave(os.path.join(dataset_dir,'{}_rgb.png'.format(i) ),(images[0].cpu().permute(1,2,0).numpy()).clip(0.0,1.0))
     # plt.imsave(os.path.join(dataset_dir,'{}_depth.png'.format(i) ),raw_depth[0].cpu())
     plt.imsave(os.path.join(dataset_dir,'{}_mask.png'.format(i) ),mask[0].cpu())
     angle_diff = torch.abs(torch.acos((pred_normals * gt_normals).sum(1)) / math.pi * 180)
