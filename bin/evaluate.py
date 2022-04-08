@@ -17,6 +17,37 @@ from torchvision import transforms
 import torch.nn.functional as NF
 
 
+def yuqun(normals):
+    normals_rgb = ((normals[0] * 0.5 + 0.5)*255).to(torch.uint8)
+    valid_mask = (torch.ne(normals_rgb,0).sum(dim=0) != 0)
+    valid_mask &=(torch.ne(normals_rgb,128).sum(dim=0) != 0)
+    valid_mask &= (torch.ne(normals_rgb,201).sum(dim=0) != 0)
+    valid_mask = valid_mask.unsqueeze(dim=0)
+    return valid_mask
+
+
+def ryan(normals):
+    # convert to numpy
+    normals[0].permute(1,2,0).numpy()
+    # convert to rgb
+    numpy_normals_rgb = normal2rgb(numpy_normals)
+    # masks out values of [0,0,0], [128,128,128], or [201,201,201]
+    valid_mask_0 = (numpy_normals_rgb != 0).sum(axis=2) != 0
+    valid_mask_128 = (numpy_normals_rgb != 128).sum(axis=2) != 0 
+    valid_mask_201 = (numpy_normals_rgb != 201).sum(axis=2) != 0
+    valid_mask = np.logical_and.reduce((valid_mask_0, valid_mask_128, valid_mask_201))
+    return valid_mask
+
+def rgb2normal(rgb):
+    n = (rgb-122.5)/122.5
+    n /= np.linalg.norm(n, ord=2, axis=2, keepdims=True)
+    return n
+
+def normal2rgb(n):
+    rgb = (n + 1)/2
+    rgb *= 255
+    return rgb.astype(np.uint8)
+
 def val_loss(n_model, dataset_list, args):
     '''
     Validate the loss of the networks on each dataset, and save the results as a file
@@ -48,18 +79,26 @@ def val_loss(n_model, dataset_list, args):
             #     angle_sharp_mask =  sharp_normal_mask(normals)
             #     valid_mask = valid_mask & (angle_sharp_mask[0] == 0) 
 
-            ### ADDED
-            valid_mask = ((normals **2).sum(dim = 1) > 0.8) # Remove invalid pixels of normals
+            ### BETTER
+            # valid_mask = ((normals **2).sum(dim = 1) > 0.8) # Remove invalid pixels of normals
+            # if dataset == 'BlendedMVS' or dataset == 'DTU':
+            #     angle_sharp_mask =  sharp_normal_mask(normals)
+            #     valid_mask = valid_mask & (angle_sharp_mask[0] == 0)
+            #     normals_rgb = ((normals[0] * 0.5 + 0.5)*255).to(torch.uint8)  
+            # if dataset == 'BlendedMVS':
+            #     valid_mask = valid_mask & ~(torch.eq(normals_rgb,0).sum(dim=0) > 2)
+            #     valid_mask = valid_mask & ~(torch.eq(normals_rgb,128).sum(dim=0) > 2)
+            # if dataset == 'DTU':
+            #     valid_mask = valid_mask & ~(torch.eq(normals_rgb,201).sum(dim=0) > 2)   
 
-            if dataset == 'BlendedMVS' or dataset == 'DTU':
-                angle_sharp_mask =  sharp_normal_mask(normals)
-                valid_mask = valid_mask & (angle_sharp_mask[0] == 0)
-                normals_rgb = ((normals[0].cpu() * 0.5 + 0.5)*255).to(torch.uint8)  
-            if dataset == 'BlendedMVS':
-                valid_mask = valid_mask & ~(torch.eq(normals_rgb,0).sum(dim=0) > 2)
-                valid_mask = valid_mask & ~(torch.eq(normals_rgb,128).sum(dim=0) > 2)
-            if dataset == 'DTU':
-                valid_mask = valid_mask & ~(torch.eq(normals_rgb,201).sum(dim=0) > 2)            
+            ### SAME
+            normals_rgb = ((normals[0] * 0.5 + 0.5)*255).to(torch.uint8)
+            valid_mask = (torch.ne(normals_rgb,0).sum(dim=0) != 0)
+            valid_mask &=(torch.ne(normals_rgb,128).sum(dim=0) != 0)
+            valid_mask &= (torch.ne(normals_rgb,201).sum(dim=0) != 0)
+            valid_mask = valid_mask.unsqueeze(dim=0)   
+
+            assert (yuqun(normals)[0].numpy() == ryan(normals)).all()
 
             normals = NF.normalize(normals, p = 2, dim = 1) # normalize it after getting the mask
             with torch.no_grad():
