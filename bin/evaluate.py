@@ -28,7 +28,7 @@ def yuqun(normals):
 
 def ryan(normals):
     # convert to numpy
-    normals[0].permute(1,2,0).numpy()
+    numpy_normals = normals[0].permute(1,2,0).cpu().numpy()
     # convert to rgb
     numpy_normals_rgb = normal2rgb(numpy_normals)
     # masks out values of [0,0,0], [128,128,128], or [201,201,201]
@@ -98,7 +98,7 @@ def val_loss(n_model, dataset_list, args):
             valid_mask &= (torch.ne(normals_rgb,201).sum(dim=0) != 0)
             valid_mask = valid_mask.unsqueeze(dim=0)   
 
-            assert (yuqun(normals)[0].numpy() == ryan(normals)).all()
+            assert (yuqun(normals)[0].cpu().numpy() == ryan(normals)).all()
 
             normals = NF.normalize(normals, p = 2, dim = 1) # normalize it after getting the mask
             with torch.no_grad():
